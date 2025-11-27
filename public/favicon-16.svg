@@ -1,0 +1,32 @@
+<svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background circle with gradient -->
+  <circle cx="8" cy="8" r="8" fill="url(#gradient)"/>
+  
+  <!-- Gradient definition -->
+  <defs>
+    <linearGradient id="gradient" x1="0%" y1="0%" x2="100%" y2="100%">
+      <stop offset="0%" style="stop-color:#00A1DE"/>
+      <stop offset="50%" style="stop-color:#FAD201"/>
+      <stop offset="100%" style="stop-color:#00A651"/>
+    </linearGradient>
+  </defs>
+  
+  <!-- Simple wheat symbol for 16x16 -->
+  <g fill="white">
+    <!-- Central grain -->
+    <ellipse cx="8" cy="4" rx="1" ry="1.5"/>
+    <!-- Side grains -->
+    <ellipse cx="6" cy="5" rx="0.8" ry="1.2"/>
+    <ellipse cx="10" cy="5" rx="0.8" ry="1.2"/>
+    <ellipse cx="5" cy="6.5" rx="0.6" ry="1"/>
+    <ellipse cx="11" cy="6.5" rx="0.6" ry="1"/>
+    <ellipse cx="8" cy="7" rx="0.8" ry="1.2"/>
+    
+    <!-- Stem -->
+    <rect x="7.5" y="8" width="1" height="6" rx="0.5"/>
+    
+    <!-- Simple leaves -->
+    <circle cx="6.5" cy="10" r="0.5"/>
+    <circle cx="9.5" cy="10" r="0.5"/>
+  </g>
+</svg>

@@ -8,13 +8,10 @@
       <!-- Logo Section -->
       <div class="flex items-center justify-center h-16 bg-white border-b border-gray-200">
         <div v-if="!sidebarCollapsed" class="flex items-center">
-          <div class="h-8 w-8 rounded-lg bg-gradient-to-br from-rwanda-blue via-rwanda-yellow to-rwanda-green flex items-center justify-center">
-            <span class="text-white font-bold text-sm">AW</span>
-          </div>
-          <span class="ml-2 text-lg font-semibold text-gray-900">Agro Wealth</span>
+          <Logo :compact="true" />
         </div>
-        <div v-else class="h-8 w-8 rounded-lg bg-gradient-to-br from-rwanda-blue via-rwanda-yellow to-rwanda-green flex items-center justify-center">
-          <span class="text-white font-bold text-sm">AW</span>
+        <div v-else>
+          <Logo :compact="true" :show-text="false" />
         </div>
       </div>
 
@@ -83,6 +80,7 @@ import {
   FolderOpen,
   LogOut
 } from 'lucide-vue-next'
+import Logo from './Logo.vue'
 
 const props = defineProps({
   collapsed: {
