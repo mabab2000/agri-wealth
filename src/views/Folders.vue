@@ -10,9 +10,7 @@
     ]" style="margin-top: 64px;">
       <!-- Header -->
       <Header 
-        title="Data Lake - Folder Management" 
-        :sidebar-collapsed="sidebarCollapsed"
-        @toggle-sidebar="handleSidebarToggle"
+        title="Data Lake - Folder Management"
       >
         <template #actions>
         </template>

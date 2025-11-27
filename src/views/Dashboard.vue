@@ -10,9 +10,7 @@
     ]" style="margin-top: 64px;">
       <!-- Header -->
       <Header 
-        title="Dashboard Overview" 
-        :sidebar-collapsed="sidebarCollapsed"
-        @toggle-sidebar="handleSidebarToggle"
+        title="Dashboard Overview"
       >
         <template #actions>
           <!-- Year Selector -->
