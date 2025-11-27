@@ -1,0 +1,28 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+/* Custom Toast Styling to match Rwanda theme */
+:root {
+  --toastify-color-success: #00A651;
+  --toastify-color-error: #dc3545;
+  --toastify-color-warning: #FAD201;
+  --toastify-color-info: #00A1DE;
+}
+
+.Vue-Toastification__toast--success {
+  background-color: var(--toastify-color-success);
+}
+
+.Vue-Toastification__toast--error {
+  background-color: var(--toastify-color-error);
+}
+
+.Vue-Toastification__toast--warning {
+  background-color: var(--toastify-color-warning);
+  color: #333;
+}
+
+.Vue-Toastification__toast--info {
+  background-color: var(--toastify-color-info);
+}
