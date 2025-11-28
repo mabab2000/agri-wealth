@@ -6,11 +6,11 @@
     <!-- Main Content Area -->
     <div :class="[
       'flex-1 flex flex-col transition-all duration-300 ease-in-out',
-      // Desktop: sidebar margins
-      'md:ml-16 md:data-[expanded]:ml-64',
-      // Mobile: top margin for navbar when expanded
-      sidebarCollapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-64 max-md:mt-16'
-    ]" style="margin-top: 64px;" :data-expanded="!sidebarCollapsed">
+      // Responsive margins based on sidebar state
+      sidebarCollapsed 
+        ? 'ml-0 md:ml-16' 
+        : 'ml-0 md:ml-64 max-md:mt-16'
+    ]" style="margin-top: 64px;">
       
       <!-- Header with Back Button -->
       <Header 
