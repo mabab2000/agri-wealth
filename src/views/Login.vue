@@ -151,41 +151,28 @@ const objectives = [
 </script>
 
 <template>
-  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-green-100 to-yellow-100 p-4 relative overflow-hidden">
+  <div class="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-100 via-green-100 to-yellow-100 p-2 sm:p-4 relative overflow-hidden">
     <!-- Background pattern -->
     <div class="absolute inset-0 overflow-hidden">
       <!-- Large circles with Rwanda colors -->
-      <div class="absolute top-10 left-10 w-96 h-96 bg-gradient-to-r from-rwanda-blue/40 to-rwanda-blue/25 rounded-full blur-3xl animate-pulse"></div>
-      <div class="absolute bottom-10 right-10 w-[28rem] h-[28rem] bg-gradient-to-r from-rwanda-green/45 to-rwanda-green/30 rounded-full blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
-      <div class="absolute top-1/2 left-1/4 w-72 h-72 bg-gradient-to-r from-rwanda-yellow/50 to-rwanda-yellow/35 rounded-full blur-2xl animate-pulse" style="animation-delay: 2s;"></div>
+      <div class="absolute top-10 left-10 w-48 sm:w-96 h-48 sm:h-96 bg-gradient-to-r from-rwanda-blue/40 to-rwanda-blue/25 rounded-full blur-2xl sm:blur-3xl animate-pulse"></div>
+      <div class="absolute bottom-10 right-10 w-56 sm:w-[28rem] h-56 sm:h-[28rem] bg-gradient-to-r from-rwanda-green/45 to-rwanda-green/30 rounded-full blur-2xl sm:blur-3xl animate-pulse" style="animation-delay: 1s;"></div>
+      <div class="absolute top-1/2 left-1/4 w-36 sm:w-72 h-36 sm:h-72 bg-gradient-to-r from-rwanda-yellow/50 to-rwanda-yellow/35 rounded-full blur-xl sm:blur-2xl animate-pulse" style="animation-delay: 2s;"></div>
       
       <!-- Medium circles -->
-      <div class="absolute top-1/3 right-1/4 w-48 h-48 bg-gradient-to-r from-rwanda-blue/35 to-blue-300/25 rounded-full blur-2xl animate-pulse" style="animation-delay: 0.5s;"></div>
-      <div class="absolute bottom-1/3 left-1/3 w-56 h-56 bg-gradient-to-r from-rwanda-green/40 to-green-300/30 rounded-full blur-2xl animate-pulse" style="animation-delay: 1.5s;"></div>
-      
-      <!-- Small accent circles -->
-      <div class="absolute top-20 right-20 w-36 h-36 bg-gradient-to-r from-rwanda-yellow/45 to-yellow-300/30 rounded-full blur-xl animate-pulse" style="animation-delay: 3s;"></div>
-      <div class="absolute bottom-20 left-20 w-40 h-40 bg-gradient-to-r from-rwanda-blue/40 to-blue-400/25 rounded-full blur-xl animate-pulse" style="animation-delay: 2.5s;"></div>
-      
-      <!-- Additional visible elements -->
-      <div class="absolute top-16 left-1/2 w-32 h-32 bg-gradient-to-r from-rwanda-green/30 to-green-400/20 rounded-full blur-lg animate-pulse" style="animation-delay: 4.5s;"></div>
-      <div class="absolute bottom-16 right-1/2 w-44 h-44 bg-gradient-to-r from-rwanda-yellow/35 to-yellow-400/25 rounded-full blur-lg animate-pulse" style="animation-delay: 3.8s;"></div>
-      
-      <!-- Geometric shapes for agricultural theme -->
-      <div class="absolute top-1/4 left-1/2 w-24 h-24 bg-rwanda-green/30 transform rotate-45 blur-sm animate-pulse" style="animation-delay: 4s;"></div>
-      <div class="absolute bottom-1/4 right-1/3 w-32 h-32 bg-rwanda-yellow/35 transform rotate-12 blur-sm animate-pulse" style="animation-delay: 3.5s;"></div>
-      <div class="absolute top-3/4 left-1/6 w-20 h-20 bg-rwanda-blue/25 transform rotate-45 blur-sm animate-pulse" style="animation-delay: 5s;"></div>
+      <div class="absolute top-1/3 right-1/4 w-24 sm:w-48 h-24 sm:h-48 bg-gradient-to-r from-rwanda-blue/35 to-blue-300/25 rounded-full blur-xl sm:blur-2xl animate-pulse" style="animation-delay: 0.5s;"></div>
+      <div class="absolute bottom-1/3 left-1/3 w-28 sm:w-56 h-28 sm:h-56 bg-gradient-to-r from-rwanda-green/40 to-green-300/30 rounded-full blur-xl sm:blur-2xl animate-pulse" style="animation-delay: 1.5s;"></div>
     </div>
     
-    <div class="bg-white/85 backdrop-blur-md rounded-2xl shadow-2xl p-10 w-full max-w-md relative z-10 border border-white/50">
+    <div class="bg-white/85 backdrop-blur-md rounded-2xl shadow-2xl p-4 sm:p-8 lg:p-10 w-full max-w-md relative z-10 border border-white/50">
       <!-- Header -->
-      <div class="text-center mb-8">
+      <div class="text-center mb-6 sm:mb-8">
         
-        <h1 class="text-3xl font-bold text-gray-900 mb-2">AgriWealth Platform</h1>
-        <p class="text-gray-500">Agricultural Analysis & Management System</p>
+        <h1 class="text-2xl sm:text-3xl font-bold text-gray-900 mb-2">AgriWealth Platform</h1>
+        <p class="text-sm sm:text-base text-gray-500">Agricultural Analysis & Management System</p>
         <button 
           @click="toggleSystemInfo"
-          class="mt-3 text-rwanda-blue hover:text-rwanda-green text-sm font-semibold transition-all duration-200 underline hover:no-underline px-2 py-1 rounded hover:bg-rwanda-blue/10 cursor-pointer"
+          class="mt-3 text-rwanda-blue hover:text-rwanda-green text-xs sm:text-sm font-semibold transition-all duration-200 underline hover:no-underline px-2 py-1 rounded hover:bg-rwanda-blue/10 cursor-pointer"
         >
           📖 Learn about our system
         </button>

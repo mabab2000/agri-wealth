@@ -9,7 +9,8 @@ export const API_ENDPOINTS = {
   LOGOUT: '/auth/logout',
   FORGOT_PASSWORD: '/auth/forgot-password',
   RESET_PASSWORD: '/auth/reset-password',
-  VERIFY_EMAIL: '/auth/verify-email'
+  VERIFY_EMAIL: '/auth/verify-email',
+  FOLDERS: '/folders'
 }
 
 // HTTP client with base configuration
@@ -133,6 +134,331 @@ export const apiClient = {
       if (error instanceof TypeError && error.message.includes('fetch')) {
         throw new Error('Network error. Please check your connection.')
       }
+      throw error
+    }
+  },
+
+  async createFolder(projectId, folderName, token) {
+    try {
+      console.log(`🌐 Creating folder for project: ${projectId}`)
+      console.log('📤 Folder data:', { folder_name: folderName })
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      
+      const response = await fetch(`${API_BASE_URL}/folders/${projectId}`, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${token}`,
+          'accept': 'application/json'
+        },
+        body: JSON.stringify({ folder_name: folderName }),
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+      
+      console.log(`📈 Response status: ${response.status} ${response.statusText}`)
+      
+      const result = await response.json()
+      console.log('📥 Response data:', result)
+
+      if (!response.ok) {
+        const errorMessage = result.message || result.error?.message || `Server error (${response.status})`
+        throw new Error(errorMessage)
+      }
+
+      return result
+    } catch (error) {
+      console.error('❌ Create Folder API Error:', error)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. Please check your connection and try again.')
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.')
+      }
+      
+      throw error
+    }
+  },
+
+  async getFolders(projectId, token) {
+    try {
+      console.log(`🌐 Getting folders for project: ${projectId}`)
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      
+      const response = await fetch(`${API_BASE_URL}/folders/${projectId}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+      
+      console.log(`📈 Response status: ${response.status} ${response.statusText}`)
+      
+      const result = await response.json()
+      console.log('📥 Response data:', result)
+
+      if (!response.ok) {
+        const errorMessage = result.message || result.error?.message || `Server error (${response.status})`
+        throw new Error(errorMessage)
+      }
+
+      return result
+    } catch (error) {
+      console.error('❌ Get Folders API Error:', error)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. Please check your connection and try again.')
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.')
+      }
+      
+      throw error
+    }
+  },
+
+  async uploadFiles(folderId, files, token) {
+    try {
+      console.log(`🌐 Uploading ${files.length} files to folder: ${folderId}`)
+      
+      const formData = new FormData()
+      
+      // Add folder_id to FormData
+      formData.append('folder_id', folderId)
+      
+      // Add files to FormData
+      files.forEach((file) => {
+        formData.append('files', file)
+      })
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 30000) // 30 second timeout for uploads
+      
+      const response = await fetch(`${API_BASE_URL}/files/upload`, {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${token}`,
+          'accept': 'application/json'
+        },
+        body: formData,
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+      
+      console.log(`📈 Response status: ${response.status} ${response.statusText}`)
+      
+      const result = await response.json()
+      console.log('📥 Response data:', result)
+
+      if (!response.ok) {
+        const errorMessage = result.message || result.error?.message || `Server error (${response.status})`
+        throw new Error(errorMessage)
+      }
+
+      return result
+    } catch (error) {
+      console.error('❌ Upload Files API Error:', error)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Upload timeout. Please check your connection and try again.')
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.')
+      }
+      
+      throw error
+    }
+  },
+
+  async getFolderFiles(folderId, token) {
+    try {
+      console.log(`🌐 Getting files for folder: ${folderId}`)
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      
+      const response = await fetch(`${API_BASE_URL}/files/folder/${folderId}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+      
+      console.log(`📈 Response status: ${response.status} ${response.statusText}`)
+      
+      const result = await response.json()
+      console.log('📥 Response data:', result)
+
+      if (!response.ok) {
+        const errorMessage = result.message || result.error?.message || `Server error (${response.status})`
+        throw new Error(errorMessage)
+      }
+
+      return result
+    } catch (error) {
+      console.error('❌ Get Folder Files API Error:', error)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. Please check your connection and try again.')
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.')
+      }
+      
+      throw error
+    }
+  },
+
+  async deleteFile(fileId, token) {
+    try {
+      console.log(`🌐 Deleting file: ${fileId}`)
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      
+      const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
+        method: 'DELETE',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+      
+      console.log(`📈 Response status: ${response.status} ${response.statusText}`)
+      
+      const result = await response.json()
+      console.log('📥 Response data:', result)
+
+      if (!response.ok) {
+        const errorMessage = result.message || result.error?.message || `Server error (${response.status})`
+        throw new Error(errorMessage)
+      }
+
+      return result
+    } catch (error) {
+      console.error('❌ Delete File API Error:', error)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. Please check your connection and try again.')
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.')
+      }
+      
+      throw error
+    }
+  },
+
+  async getFileDownloadUrl(fileId, token) {
+    try {
+      console.log(`🌐 Getting download URL for file: ${fileId}`)
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      
+      const response = await fetch(`${API_BASE_URL}/files/download/${fileId}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+      
+      console.log(`📈 Response status: ${response.status} ${response.statusText}`)
+
+      if (!response.ok) {
+        const result = await response.json()
+        const errorMessage = result.message || result.error?.message || `Server error (${response.status})`
+        throw new Error(errorMessage)
+      }
+
+      // Parse JSON response to get download_url
+      const result = await response.json()
+      console.log('📥 Download URL response:', result)
+      
+      return result
+    } catch (error) {
+      console.error('❌ Get File Download URL API Error:', error)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. Please check your connection and try again.')
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.')
+      }
+      
+      throw error
+    }
+  },
+
+  async getFilePreviewUrl(fileId, token) {
+    try {
+      console.log(`🌐 Getting preview URL for file: ${fileId}`)
+      
+      const controller = new AbortController()
+      const timeoutId = setTimeout(() => controller.abort(), 10000)
+      
+      const response = await fetch(`${API_BASE_URL}/files/${fileId}`, {
+        method: 'GET',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        },
+        signal: controller.signal
+      })
+
+      clearTimeout(timeoutId)
+      
+      console.log(`📈 Response status: ${response.status} ${response.statusText}`)
+
+      if (!response.ok) {
+        const result = await response.json()
+        const errorMessage = result.message || result.error?.message || `Server error (${response.status})`
+        throw new Error(errorMessage)
+      }
+
+      const result = await response.json()
+      console.log('📥 Preview URL response:', result)
+      
+      return result
+    } catch (error) {
+      console.error('❌ Get File Preview URL API Error:', error)
+      
+      if (error.name === 'AbortError') {
+        throw new Error('Request timeout. Please check your connection and try again.')
+      }
+      
+      if (error instanceof TypeError && error.message.includes('fetch')) {
+        throw new Error('Network error. Please check your connection.')
+      }
+      
       throw error
     }
   }

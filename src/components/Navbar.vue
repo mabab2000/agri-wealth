@@ -1,12 +1,37 @@
 <template>
-  <!-- Sidebar -->
+  <!-- Sidebar / Top Nav -->
   <div :class="[
-    'fixed left-0 h-full bg-white shadow-xl z-10 transition-all duration-300 ease-in-out border-r border-gray-200',
-    sidebarCollapsed ? 'w-16' : 'w-64'
-  ]" style="top: 64px;">
-    <div class="flex flex-col h-full">
+    'fixed bg-white shadow-xl z-40 transition-all duration-300 ease-in-out border-gray-200',
+    // Desktop: sidebar on left
+    'md:left-0 md:h-full md:border-r',
+    sidebarCollapsed ? 'md:w-16' : 'md:w-64',
+    // Mobile: top navbar
+    'max-md:left-0 max-md:right-0 max-md:border-b max-md:h-auto',
+    sidebarCollapsed ? 'max-md:-translate-y-full max-md:opacity-0' : 'max-md:translate-y-0 max-md:opacity-100'
+  ]" :style="{
+    top: '64px'
+  }">
+    <!-- Mobile overlay -->
+    <div 
+      v-if="!sidebarCollapsed" 
+      class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" 
+      @click="toggleSidebar"
+    ></div>
+    <div :class="[
+      'flex h-full',
+      // Desktop: column layout
+      'md:flex-col',
+      // Mobile: column layout (same as desktop)
+      'max-md:flex-col'
+    ]">
       <!-- Toggle Section -->
-      <div class="flex items-center justify-end h-12 bg-white border-b border-gray-200 pr-2">
+      <div :class="[
+        'flex items-center bg-white border-gray-200',
+        // Desktop: top section
+        'md:justify-end md:h-12 md:border-b md:pr-2',
+        // Mobile: top section (same as desktop)
+        'max-md:justify-end max-md:h-12 max-md:border-b max-md:pr-2'
+      ]">
         <!-- Toggle Button -->
         <button
           @click="toggleSidebar"
@@ -17,7 +42,13 @@
       </div>
 
       <!-- Navigation -->
-      <nav class="flex-1 px-2 py-4 space-y-2 overflow-y-auto">
+      <nav :class="[
+        'px-2 py-2 overflow-y-auto',
+        // Desktop: vertical layout
+        'md:flex-1 md:space-y-2',
+        // Mobile: vertical layout (same as desktop)
+        'max-md:flex-1 max-md:space-y-2'
+      ]">
         <!-- Dashboard Link -->
         <router-link
           to="/dashboard"
@@ -41,12 +72,18 @@
           ]"
         >
           <FolderOpen :size="20" />
-          <span v-if="!sidebarCollapsed" class="ml-3">Data Lake</span>
+          <span v-if="!sidebarCollapsed" class="ml-3">Folders</span>
         </router-link>
       </nav>
 
       <!-- User Info and Logout -->
-      <div class="p-4 border-t border-gray-200 mb-12">
+      <div :class="[
+        'p-2 border-gray-200',
+        // Desktop: bottom section
+        'md:border-t md:mb-12',
+        // Mobile: bottom section (same as desktop)
+        'max-md:border-t max-md:mb-4'
+      ]">
         <div 
           @click="showUserModal = true"
           :class="[

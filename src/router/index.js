@@ -3,6 +3,7 @@ import Login from '../views/Login.vue'
 import Signup from '../views/Signup.vue'
 import Dashboard from '../views/Dashboard.vue'
 import Folders from '../views/Folders.vue'
+import FolderDetail from '../views/FolderDetail.vue'
 
 const routes = [
   {
@@ -25,6 +26,12 @@ const routes = [
     path: '/folders',
     name: 'Folders',
     component: Folders,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/folders/:id',
+    name: 'FolderDetail',
+    component: FolderDetail,
     meta: { requiresAuth: true }
   }
 ]

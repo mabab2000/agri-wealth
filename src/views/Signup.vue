@@ -12,27 +12,16 @@ const currentStep = ref(1)
 const personalInfo = ref({
   fullName: '',
   email: '',
-  phone: ''
+  phone: '+250'
 })
 
-// Step 2: Organization Information
-const organizationInfo = ref({
-  type: '', // 'individual' or 'company'
-  companyName: '',
-  position: '',
-  organizationSize: '',
-  location: ''
-})
-
-// Step 3: Project Information
+// Step 2: Project Information
 const projectInfo = ref({
-  projectType: '',
-  projectDescription: '',
-  expectedImpact: '',
-  timeline: ''
+  projectDescription: 'Agricultural data analysis and farm management optimization to improve crop yields and resource efficiency.',
+  expectedImpact: ''
 })
 
-// Step 4: Password
+// Step 3: Password
 const passwordInfo = ref({
   password: '',
   confirmPassword: ''
@@ -48,15 +37,12 @@ const validateStep = (step) => {
     if (!personalInfo.value.fullName) errors.value.fullName = 'Full name is required'
     if (!personalInfo.value.email) errors.value.email = 'Email is required'
     if (!personalInfo.value.phone) errors.value.phone = 'Phone number is required'
-  } else if (step === 2) {
-    if (!organizationInfo.value.type) errors.value.type = 'Organization type is required'
-    if (organizationInfo.value.type === 'company' && !organizationInfo.value.companyName) {
-      errors.value.companyName = 'Company name is required'
+    else if (!/^\+250\d{9}$/.test(personalInfo.value.phone.trim())) {
+      errors.value.phone = 'Phone number must be in format +250xxxxxxxxx (9 digits after +250)'
     }
-  } else if (step === 3) {
-    if (!projectInfo.value.projectType) errors.value.projectType = 'Project type is required'
+  } else if (step === 2) {
     if (!projectInfo.value.projectDescription) errors.value.projectDescription = 'Project description is required'
-  } else if (step === 4) {
+  } else if (step === 3) {
     if (!passwordInfo.value.password) errors.value.password = 'Password is required'
     if (passwordInfo.value.password.length < 6) errors.value.password = 'Password must be at least 6 characters'
     if (passwordInfo.value.password !== passwordInfo.value.confirmPassword) {
@@ -69,7 +55,7 @@ const validateStep = (step) => {
 
 const nextStep = () => {
   if (validateStep(currentStep.value)) {
-    if (currentStep.value < 4) {
+    if (currentStep.value < 3) {
       currentStep.value++
     } else {
       handleSignup()
@@ -94,18 +80,9 @@ const handleSignup = async () => {
         email: personalInfo.value.email,
         phone: personalInfo.value.phone
       },
-      organizationInfo: {
-        type: organizationInfo.value.type,
-        companyName: organizationInfo.value.companyName || '',
-        position: organizationInfo.value.position || '',
-        organizationSize: organizationInfo.value.organizationSize || '',
-        location: organizationInfo.value.location || ''
-      },
       projectInfo: {
-        projectType: projectInfo.value.projectType,
         projectDescription: projectInfo.value.projectDescription,
-        expectedImpact: projectInfo.value.expectedImpact || '',
-        timeline: projectInfo.value.timeline || ''
+        expectedImpact: projectInfo.value.expectedImpact || ''
       },
       passwordInfo: {
         password: passwordInfo.value.password,
@@ -131,9 +108,8 @@ const handleSignup = async () => {
       toast.success('Account created successfully! Welcome to AgriWealth Platform.')
       
       // Clear form data only on success
-      personalInfo.value = { fullName: '', email: '', phone: '' }
-      organizationInfo.value = { type: '', companyName: '', position: '', organizationSize: '', location: '' }
-      projectInfo.value = { projectType: '', projectDescription: '', expectedImpact: '', timeline: '' }
+      personalInfo.value = { fullName: '', email: '', phone: '+250' }
+      projectInfo.value = { projectDescription: 'Agricultural data analysis and farm management optimization to improve crop yields and resource efficiency.', expectedImpact: '' }
       passwordInfo.value = { password: '', confirmPassword: '' }
       currentStep.value = 1
       
@@ -166,22 +142,18 @@ const handleSignup = async () => {
       currentStep.value = 1
     } else if (error.message.includes('password') && error.message.includes('requirements')) {
       toast.error('Password must be at least 6 characters long.')
-      // Navigate to step 4 (password) to edit password
-      currentStep.value = 4
-    } else if (error.message.includes('company name') || error.message.includes('organization')) {
-      toast.error('Please check your organization information.')
-      // Navigate to step 2 (organization) to edit
-      currentStep.value = 2
+      // Navigate to step 3 (password) to edit password
+      currentStep.value = 3
     } else if (error.message.includes('project') || error.message.includes('description')) {
       toast.error('Please check your project information.')
-      // Navigate to step 3 (project) to edit
-      currentStep.value = 3
+      // Navigate to step 2 (project) to edit
+      currentStep.value = 2
     } else {
       // Show the cleaned error message from the server
       toast.error(`${error.message || 'Please check your information and try again.'}\n\nYour data has been preserved - please review and correct any issues.`)
       
       // Stay on current step or go to step 1 if unsure where the error is
-      if (currentStep.value === 4) {
+      if (currentStep.value === 3) {
         // If we're on the final step, go back to step 1 to review all data
         currentStep.value = 1
       }
@@ -195,30 +167,25 @@ const goToLogin = () => {
   router.push('/')
 }
 
-const projectTypes = [
-  'Crop Production',
-  'Livestock Management',
-  'Agricultural Technology',
-  'Sustainable Farming',
-  'Market Analysis',
-  'Supply Chain Management',
-  'Research & Development',
-  'Other'
-]
+const ensurePhonePrefix = () => {
+  let phoneValue = personalInfo.value.phone
+  
+  // Remove any non-digit characters except + at the beginning
+  phoneValue = phoneValue.replace(/[^\d+]/g, '')
+  
+  // If user deleted the prefix, restore it
+  if (!phoneValue.startsWith('+250')) {
+    // Extract only the digits and limit to 9 digits
+    const digits = phoneValue.replace(/^\+?250?/, '').slice(0, 9)
+    personalInfo.value.phone = '+250' + digits
+  } else {
+    // Ensure we have exactly +250 followed by up to 9 digits
+    const digits = phoneValue.slice(4).slice(0, 9)
+    personalInfo.value.phone = '+250' + digits
+  }
+}
 
-const organizationSizes = [
-  '1-10 employees',
-  '11-50 employees',
-  '51-200 employees',
-  '200+ employees'
-]
 
-const timelines = [
-  '1-3 months',
-  '3-6 months',
-  '6-12 months',
-  '1+ years'
-]
 </script>
 
 <template>
@@ -241,13 +208,13 @@ const timelines = [
       <!-- Progress Indicator -->
       <div class="mb-6">
         <div class="flex justify-between items-center mb-2">
-          <span class="text-xs text-gray-500">Step {{ currentStep }} of 4</span>
-          <span class="text-xs text-gray-500">{{ Math.round((currentStep / 4) * 100) }}%</span>
+          <span class="text-xs text-gray-500">Step {{ currentStep }} of 3</span>
+          <span class="text-xs text-gray-500">{{ Math.round((currentStep / 3) * 100) }}%</span>
         </div>
         <div class="w-full bg-gray-200 rounded-full h-2">
           <div 
             class="bg-gradient-to-r from-rwanda-blue to-rwanda-green h-2 rounded-full transition-all duration-300"
-            :style="{ width: `${(currentStep / 4) * 100}%` }"
+            :style="{ width: `${(currentStep / 3) * 100}%` }"
           ></div>
         </div>
       </div>
@@ -293,107 +260,17 @@ const timelines = [
             required
             class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
             :class="{ 'border-red-500': errors.phone }"
-            placeholder="+250 xxx xxx xxx"
+            placeholder="+250xxxxxxxxx"
+            @input="ensurePhonePrefix"
           />
           <p v-if="errors.phone" class="text-red-500 text-xs mt-1">{{ errors.phone }}</p>
         </div>
       </div>
 
-      <!-- Step 2: Organization Information -->
+      <!-- Step 2: Project Information -->
       <div v-if="currentStep === 2" class="space-y-4">
-        <h2 class="text-lg font-semibold text-gray-800 mb-4">Organization Information</h2>
-        
-        <div>
-          <label class="block text-xs font-medium text-gray-700 mb-2">Organization Type</label>
-          <div class="space-y-2">
-            <label class="flex items-center cursor-pointer">
-              <input
-                v-model="organizationInfo.type"
-                type="radio"
-                value="individual"
-                class="mr-2 accent-rwanda-blue"
-              />
-              <span class="text-sm">Individual Farmer</span>
-            </label>
-            <label class="flex items-center cursor-pointer">
-              <input
-                v-model="organizationInfo.type"
-                type="radio"
-                value="company"
-                class="mr-2 accent-rwanda-blue"
-              />
-              <span class="text-sm">Company/Organization</span>
-            </label>
-          </div>
-          <p v-if="errors.type" class="text-red-500 text-xs mt-1">{{ errors.type }}</p>
-        </div>
-
-        <div v-if="organizationInfo.type === 'company'">
-          <label for="companyName" class="block text-xs font-medium text-gray-700 mb-1">Company Name</label>
-          <input
-            id="companyName"
-            v-model="organizationInfo.companyName"
-            type="text"
-            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
-            :class="{ 'border-red-500': errors.companyName }"
-            placeholder="Enter company name"
-          />
-          <p v-if="errors.companyName" class="text-red-500 text-xs mt-1">{{ errors.companyName }}</p>
-        </div>
-
-        <div v-if="organizationInfo.type === 'company'">
-          <label for="position" class="block text-xs font-medium text-gray-700 mb-1">Your Position</label>
-          <input
-            id="position"
-            v-model="organizationInfo.position"
-            type="text"
-            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
-            placeholder="e.g., Farm Manager, CEO, Agricultural Specialist"
-          />
-        </div>
-
-        <div v-if="organizationInfo.type === 'company'">
-          <label for="organizationSize" class="block text-xs font-medium text-gray-700 mb-1">Organization Size</label>
-          <select
-            id="organizationSize"
-            v-model="organizationInfo.organizationSize"
-            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
-          >
-            <option value="">Select size</option>
-            <option v-for="size in organizationSizes" :key="size" :value="size">{{ size }}</option>
-          </select>
-        </div>
-
-        <div>
-          <label for="location" class="block text-xs font-medium text-gray-700 mb-1">Location</label>
-          <input
-            id="location"
-            v-model="organizationInfo.location"
-            type="text"
-            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
-            placeholder="City, Province, Rwanda"
-          />
-        </div>
-      </div>
-
-      <!-- Step 3: Project Information -->
-      <div v-if="currentStep === 3" class="space-y-4">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Project Information</h2>
         
-        <div>
-          <label for="projectType" class="block text-xs font-medium text-gray-700 mb-1">Project Type</label>
-          <select
-            id="projectType"
-            v-model="projectInfo.projectType"
-            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
-            :class="{ 'border-red-500': errors.projectType }"
-          >
-            <option value="">Select project type</option>
-            <option v-for="type in projectTypes" :key="type" :value="type">{{ type }}</option>
-          </select>
-          <p v-if="errors.projectType" class="text-red-500 text-xs mt-1">{{ errors.projectType }}</p>
-        </div>
-
         <div>
           <label for="projectDescription" class="block text-xs font-medium text-gray-700 mb-1">Project Description</label>
           <textarea
@@ -402,7 +279,7 @@ const timelines = [
             rows="3"
             class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
             :class="{ 'border-red-500': errors.projectDescription }"
-            placeholder="Describe your agricultural project and goals"
+            placeholder="Describe your specific agricultural analysis needs and goals"
           ></textarea>
           <p v-if="errors.projectDescription" class="text-red-500 text-xs mt-1">{{ errors.projectDescription }}</p>
         </div>
@@ -418,21 +295,11 @@ const timelines = [
           ></textarea>
         </div>
 
-        <div>
-          <label for="timeline" class="block text-xs font-medium text-gray-700 mb-1">Project Timeline</label>
-          <select
-            id="timeline"
-            v-model="projectInfo.timeline"
-            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
-          >
-            <option value="">Select timeline</option>
-            <option v-for="time in timelines" :key="time" :value="time">{{ time }}</option>
-          </select>
-        </div>
+
       </div>
 
-      <!-- Step 4: Password -->
-      <div v-if="currentStep === 4" class="space-y-4">
+      <!-- Step 3: Password -->
+      <div v-if="currentStep === 3" class="space-y-4">
         <h2 class="text-lg font-semibold text-gray-800 mb-4">Create Password</h2>
         
         <div>
@@ -468,9 +335,7 @@ const timelines = [
           <div class="text-xs text-gray-600 space-y-1">
             <p><strong>Name:</strong> {{ personalInfo.fullName }}</p>
             <p><strong>Email:</strong> {{ personalInfo.email }}</p>
-            <p><strong>Type:</strong> {{ organizationInfo.type === 'individual' ? 'Individual Farmer' : 'Company' }}</p>
-            <p v-if="organizationInfo.companyName"><strong>Company:</strong> {{ organizationInfo.companyName }}</p>
-            <p><strong>Project:</strong> {{ projectInfo.projectType }}</p>
+            <p><strong>Focus:</strong> Agricultural Analysis</p>
           </div>
         </div>
       </div>
@@ -491,8 +356,8 @@ const timelines = [
           :disabled="isLoading"
           class="px-6 py-2 bg-gradient-to-r from-rwanda-blue to-rwanda-green text-white text-sm font-semibold rounded-md hover:shadow-lg hover:-translate-y-0.5 transition-all duration-200 disabled:opacity-70 disabled:cursor-not-allowed disabled:hover:translate-y-0"
         >
-          <span v-if="!isLoading && currentStep < 4">Next</span>
-          <span v-else-if="!isLoading && currentStep === 4">Create Account</span>
+          <span v-if="!isLoading && currentStep < 3">Next</span>
+          <span v-else-if="!isLoading && currentStep === 3">Create Account</span>
           <div v-else class="flex items-center justify-center">
             <div class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
           </div>

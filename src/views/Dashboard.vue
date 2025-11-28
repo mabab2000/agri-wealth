@@ -6,19 +6,22 @@
     <!-- Main Content Area -->
     <div :class="[
       'flex-1 flex flex-col transition-all duration-300 ease-in-out',
-      sidebarCollapsed ? 'ml-16' : 'ml-64'
-    ]" style="margin-top: 64px;">
+      // Desktop: sidebar margins
+      'md:ml-16 md:data-[expanded]:ml-64',
+      // Mobile: top margin for navbar when expanded
+      sidebarCollapsed ? 'ml-0 md:ml-16' : 'ml-0 md:ml-64 max-md:mt-16'
+    ]" style="margin-top: 64px;" :data-expanded="!sidebarCollapsed">
       <!-- Header -->
       <Header 
-        title="Dashboard Overview"
+        title="Dashboard Overview" 
       >
         <template #actions>
           <!-- Year Selector -->
-          <div class="flex items-center space-x-2">
-            <label class="text-sm font-medium text-gray-700">Year:</label>
+          <div class="flex items-center space-x-1 sm:space-x-2">
+            <label class="text-xs sm:text-sm font-medium text-gray-700 hidden sm:block">Year:</label>
             <select 
               v-model="selectedYear"
-              class="border border-gray-300 rounded-md px-3 py-1 text-sm focus:outline-none focus:ring-2 focus:ring-rwanda-blue focus:border-transparent"
+              class="border border-gray-300 rounded-md px-2 py-1 text-xs sm:text-sm focus:outline-none focus:ring-2 focus:ring-rwanda-blue focus:border-transparent"
             >
               <option v-for="year in availableYears" :key="year" :value="year">
                 {{ year }}
@@ -29,9 +32,10 @@
           <!-- Compare Button -->
           <button
             @click="showCompareModal = true"
-            class="bg-rwanda-blue hover:bg-blue-600 text-white px-4 py-2 rounded-lg text-sm font-medium transition-colors flex items-center space-x-2"
+            class="bg-rwanda-blue hover:bg-blue-600 text-white px-2 sm:px-4 py-1 sm:py-2 rounded-lg text-xs sm:text-sm font-medium transition-colors flex items-center space-x-1 sm:space-x-2"
           >
-            <span>Compare</span>
+            <span class="hidden sm:inline">Compare</span>
+            <span class="sm:hidden">📊</span>
           </button>
         </template>
       </Header>
