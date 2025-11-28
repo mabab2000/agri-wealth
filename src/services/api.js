@@ -72,10 +72,23 @@ export const apiClient = {
         }
         
         if (response.status === 401) {
-          // Authentication error - handle nested detail format
-          const errorDetail = result.detail || result
-          const errorData = errorDetail.error || errorDetail
-          const errorMessage = errorData.message || 'Invalid credentials'
+          // Authentication error - handle multiple nested formats
+          let errorMessage = 'Invalid credentials'
+          
+          if (result.detail) {
+            if (typeof result.detail === 'string') {
+              errorMessage = result.detail
+            } else if (result.detail.message) {
+              errorMessage = result.detail.message
+            } else if (result.detail.error?.message) {
+              errorMessage = result.detail.error.message
+            }
+          } else if (result.message) {
+            errorMessage = result.message
+          } else if (result.error?.message) {
+            errorMessage = result.error.message
+          }
+          
           throw new Error(errorMessage)
         }
         

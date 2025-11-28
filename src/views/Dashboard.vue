@@ -9,11 +9,12 @@
       // Responsive margins based on sidebar state
       sidebarCollapsed 
         ? 'ml-0 md:ml-16' 
-        : 'ml-0 md:ml-64 max-md:mt-16'
+        : 'ml-0 md:ml-64'
     ]" style="margin-top: 64px;">
       <!-- Header -->
       <Header 
         title="Dashboard Overview" 
+        @toggle-sidebar="handleSidebarToggle"
       >
         <template #actions>
           <!-- Year Selector -->
@@ -228,7 +229,8 @@
 </template>
 
 <script setup>
-import { ref } from 'vue'
+import { ref, onMounted } from 'vue'
+import { useRouter } from 'vue-router'
 import { useToast } from 'vue-toastification'
 import {
   Chart as ChartJS,
@@ -253,6 +255,19 @@ import {
 import Navbar from '../components/Navbar.vue'
 import Header from '../components/Header.vue'
 
+const router = useRouter()
+const toast = useToast()
+
+// Authentication check
+onMounted(() => {
+  const token = localStorage.getItem('accessToken')
+  if (!token) {
+    toast.error('Please log in to access the dashboard')
+    router.push('/')
+    return
+  }
+})
+
 // Register Chart.js components
 ChartJS.register(
   CategoryScale,
@@ -267,10 +282,8 @@ ChartJS.register(
   Legend
 )
 
-const toast = useToast()
-
-// Sidebar state
-const sidebarCollapsed = ref(false)
+// Sidebar state - initialize based on screen size
+const sidebarCollapsed = ref(true) // Start collapsed by default
 
 // Year comparison
 const showCompareModal = ref(false)
@@ -278,8 +291,10 @@ const selectedYear = ref(2024)
 const compareToYear = ref(2023)
 const availableYears = ref([2024, 2023, 2022, 2021, 2020])
 
-const handleSidebarToggle = (collapsed) => {
-  sidebarCollapsed.value = collapsed
+const handleSidebarToggle = (newState) => {
+  console.log('Dashboard: Received toggle event with:', newState)
+  sidebarCollapsed.value = newState
+  console.log('Dashboard: Sidebar state is now:', sidebarCollapsed.value)
 }
 
 const handleCompareYears = () => {

@@ -98,25 +98,25 @@ const handleSignup = async () => {
 
     // Handle successful signup
     if (response.success) {
-      // Store tokens if needed (you might want to store in localStorage or cookies)
-      if (response.data.tokens) {
-        localStorage.setItem('accessToken', response.data.tokens.accessToken)
-        localStorage.setItem('refreshToken', response.data.tokens.refreshToken)
-      }
-
       // Show success toast
-      toast.success('Account created successfully! Welcome to AgriWealth Platform.')
+      toast.success('Account created successfully! Please log in to continue.')
       
-      // Clear form data only on success
+      // Don't store authentication data - user needs to log in
+      // Remove any stored tokens to ensure clean state
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+      
+      // Clear form data on success
       personalInfo.value = { fullName: '', email: '', phone: '+250' }
       projectInfo.value = { projectDescription: 'Agricultural data analysis and farm management optimization to improve crop yields and resource efficiency.', expectedImpact: '' }
       passwordInfo.value = { password: '', confirmPassword: '' }
       currentStep.value = 1
       
-      // Redirect to login page
+      // Redirect to login page after successful signup
       setTimeout(() => {
         router.push('/')
-      }, 1500)
+      }, 2000)
     }
   } catch (error) {
     // Handle API errors

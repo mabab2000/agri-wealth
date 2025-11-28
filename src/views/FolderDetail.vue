@@ -9,12 +9,12 @@
       // Responsive margins based on sidebar state
       sidebarCollapsed 
         ? 'ml-0 md:ml-16' 
-        : 'ml-0 md:ml-64 max-md:mt-16'
+        : 'ml-0 md:ml-64'
     ]" style="margin-top: 64px;">
       
       <!-- Header with Back Button -->
       <Header 
-      
+        @toggle-sidebar="handleSidebarToggle"
       >
         <template #actions>
           <button
@@ -465,7 +465,7 @@ const router = useRouter()
 const toast = useToast()
 
 // Component state
-const sidebarCollapsed = ref(false)
+const sidebarCollapsed = ref(true) // Start collapsed by default
 const isLoading = ref(false)
 const isUploading = ref(false)
 const showUploadModal = ref(false)
@@ -544,8 +544,10 @@ const isAllSelected = computed(() => {
 const token = ref(null)
 const projectId = ref(null)
 
-const handleSidebarToggle = (collapsed) => {
-  sidebarCollapsed.value = collapsed
+const handleSidebarToggle = (newState) => {
+  console.log('FolderDetail: Received toggle event with:', newState)
+  sidebarCollapsed.value = newState
+  console.log('FolderDetail: Sidebar state is now:', sidebarCollapsed.value)
 }
 
 const goBack = () => {

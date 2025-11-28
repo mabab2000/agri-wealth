@@ -9,11 +9,12 @@
       // Responsive margins based on sidebar state
       sidebarCollapsed 
         ? 'ml-0 md:ml-16' 
-        : 'ml-0 md:ml-64 max-md:mt-16'
+        : 'ml-0 md:ml-64'
     ]" style="margin-top: 64px;">
       <!-- Header -->
       <Header 
         title="Data Lake - Folder Management" 
+        @toggle-sidebar="handleSidebarToggle"
       >
         <template #actions>
         </template>
@@ -141,15 +142,17 @@ const token = ref(null)
 const projectId = ref(null)
 
 // Sidebar state
-const sidebarCollapsed = ref(false)
+const sidebarCollapsed = ref(true) // Start collapsed by default
 
 // Folder management
 const showCreateFolderModal = ref(false)
 const newFolderName = ref('')
 const folders = ref([])
 
-const handleSidebarToggle = (collapsed) => {
-  sidebarCollapsed.value = collapsed
+const handleSidebarToggle = (newState) => {
+  console.log('Folders: Received toggle event with:', newState)
+  sidebarCollapsed.value = newState
+  console.log('Folders: Sidebar state is now:', sidebarCollapsed.value)
 }
 
 const openFolder = (folder) => {
@@ -283,8 +286,14 @@ const handleCreateFolder = async () => {
 }
 
 onMounted(async () => {
-  // Check authentication
+  // Check authentication first
   token.value = localStorage.getItem('accessToken')
+  
+  if (!token.value) {
+    toast.error('Please log in to access folders')
+    router.push('/')
+    return
+  }
   
   // Get project ID from token or localStorage
   if (token.value) {

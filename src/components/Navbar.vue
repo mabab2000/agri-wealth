@@ -5,34 +5,28 @@
     // Desktop: sidebar on left
     'md:left-0 md:h-full md:border-r',
     sidebarCollapsed ? 'md:w-16' : 'md:w-64',
-    // Mobile: top navbar
-    'max-md:left-0 max-md:right-0 max-md:border-b max-md:h-auto',
-    sidebarCollapsed ? 'max-md:-translate-y-full max-md:opacity-0' : 'max-md:translate-y-0 max-md:opacity-100'
+    // Mobile: dropdown from top when open, hidden when closed
+    'max-md:left-0 max-md:right-0 max-md:border-b',
+    sidebarCollapsed ? 'max-md:hidden' : 'max-md:block max-md:h-auto'
   ]" :style="{
     top: '64px'
   }">
-    <!-- Mobile overlay -->
+    <!-- Mobile overlay - only show when nav is open on mobile -->
     <div 
       v-if="!sidebarCollapsed" 
       class="md:hidden fixed inset-0 bg-black bg-opacity-50 z-30" 
-      @click="toggleSidebar"
+      @click="closeMobileNav"
     ></div>
     <div :class="[
-      'flex h-full',
+      'flex h-full relative z-50',
       // Desktop: column layout
       'md:flex-col',
-      // Mobile: column layout (same as desktop)
-      'max-md:flex-col'
+      // Mobile: column layout but with proper height
+      'max-md:flex-col max-md:min-h-[400px] max-md:max-h-[80vh]'
     ]">
-      <!-- Toggle Section -->
-      <div :class="[
-        'flex items-center bg-white border-gray-200',
-        // Desktop: top section
-        'md:justify-end md:h-12 md:border-b md:pr-2',
-        // Mobile: top section (same as desktop)
-        'max-md:justify-end max-md:h-12 max-md:border-b max-md:pr-2'
-      ]">
-        <!-- Toggle Button -->
+      <!-- Toggle Section - Desktop only -->
+      <div class="hidden md:flex items-center bg-white border-gray-200 justify-end h-12 border-b pr-2">
+        <!-- Toggle Button - Desktop only -->
         <button
           @click="toggleSidebar"
           class="p-1 rounded hover:bg-gray-100 transition-colors"
@@ -52,6 +46,7 @@
         <!-- Dashboard Link -->
         <router-link
           to="/dashboard"
+          @click="handleNavClick"
           :class="[
             'w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
             $route.path === '/dashboard' ? 'bg-rwanda-blue text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
@@ -65,6 +60,7 @@
         <!-- Folders Link -->
         <router-link
           to="/folders"
+          @click="handleNavClick"
           :class="[
             'w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
             $route.path === '/folders' ? 'bg-rwanda-blue text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
@@ -187,16 +183,21 @@ const emit = defineEmits(['toggle-sidebar'])
 const router = useRouter()
 const toast = useToast()
 
-const sidebarCollapsed = ref(props.collapsed)
 const userInfo = ref({})
 const showUserModal = ref(false)
+
+// Initialize mobile state properly
+const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768
+
+// Use computed for sidebar state to stay in sync with props
+const sidebarCollapsed = computed(() => props.collapsed)
 
 const userName = computed(() => {
   return userInfo.value?.name || userInfo.value?.fullName || 'User'
 })
 
 const userEmail = computed(() => {
-  return userInfo.value?.email || 'user@example.com'
+  return userInfo.value?.email || ''
 })
 
 const userInitials = computed(() => {
@@ -205,16 +206,41 @@ const userInitials = computed(() => {
 })
 
 const toggleSidebar = () => {
-  sidebarCollapsed.value = !sidebarCollapsed.value
-  emit('toggle-sidebar', sidebarCollapsed.value)
+  const newState = !sidebarCollapsed.value
+  emit('toggle-sidebar', newState)
+  
+  console.log('Navbar: Toggling sidebar to:', newState)
+  
+  // On mobile, close user modal when toggling
+  if (isMobile()) {
+    showUserModal.value = false
+  }
 }
 
-// Watch for prop changes
-watch(() => props.collapsed, (newVal) => {
-  sidebarCollapsed.value = newVal
-})
+const handleNavClick = () => {
+  // Auto-close navbar on mobile when navigation link is clicked
+  if (isMobile() && !sidebarCollapsed.value) {
+    emit('toggle-sidebar', true)
+    showUserModal.value = false
+    console.log('Navbar: Auto-closing after navigation click')
+  }
+}
+
+const closeMobileNav = () => {
+  // Close on mobile when clicking overlay
+  if (isMobile()) {
+    emit('toggle-sidebar', true)
+    showUserModal.value = false
+    console.log('Navbar: Closing via overlay')
+  }
+}
+
+// No need for watch anymore since we use computed
 
 const handleLogout = () => {
+  // Close any open modals first
+  showUserModal.value = false
+  
   localStorage.removeItem('accessToken')
   localStorage.removeItem('refreshToken')
   localStorage.removeItem('user')
@@ -230,6 +256,24 @@ onMounted(() => {
       userInfo.value = JSON.parse(userData)
     } catch (error) {
       console.error('Error parsing user data:', error)
+    }
+  }
+  
+  // Handle window resize
+  const handleResize = () => {
+    const mobile = isMobile()
+    if (mobile && !sidebarCollapsed.value) {
+      // On mobile, default to collapsed
+      emit('toggle-sidebar', true)
+    }
+  }
+  
+  if (typeof window !== 'undefined') {
+    window.addEventListener('resize', handleResize)
+    
+    // Return cleanup function
+    return () => {
+      window.removeEventListener('resize', handleResize)
     }
   }
 })

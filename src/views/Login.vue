@@ -2,6 +2,7 @@
 import { ref } from 'vue'
 import { useRouter } from 'vue-router'
 import { useToast } from "vue-toastification"
+import { Eye, EyeOff } from 'lucide-vue-next'
 import { apiClient, API_ENDPOINTS } from '../services/api.js'
 
 const router = useRouter()
@@ -11,6 +12,7 @@ const password = ref('')
 const isLoading = ref(false)
 const rememberMe = ref(false)
 const showSystemInfo = ref(false)
+const showPassword = ref(false)
 
 const handleLogin = async () => {
   isLoading.value = true
@@ -38,30 +40,62 @@ const handleLogin = async () => {
     console.log('Login response received:', response)
 
     // Handle successful login
-    if (response && (response.success || response.data || response.token || response.access_token)) {
+    if (response && response.success !== false) {
       // Handle different response formats
-      let userData, tokens
+      let userData, accessToken, refreshToken
       
-      if (response.data) {
-        userData = response.data.user || response.data
-        tokens = response.data.tokens || response.data
-      } else if (response.user) {
-        userData = response.user
-        tokens = { accessToken: response.token || response.accessToken }
-      } else {
-        userData = response
-        tokens = { accessToken: response.token || response.access_token || response.accessToken }
+      console.log('🔍 Analyzing response structure:', response)
+      
+      // Check for the actual API format: data.tokens.accessToken
+      if (response.data && response.data.tokens) {
+        accessToken = response.data.tokens.accessToken
+        refreshToken = response.data.tokens.refreshToken
+        userData = response.data.user
       }
+      // Check for direct token in response
+      else if (response.access_token || response.token || response.accessToken) {
+        accessToken = response.access_token || response.token || response.accessToken
+        refreshToken = response.refresh_token || response.refreshToken
+        userData = response.user || response.data?.user || { email: email.value }
+      }
+      // Check for nested data structure (legacy format)
+      else if (response.data) {
+        accessToken = response.data.access_token || response.data.token || response.data.accessToken
+        refreshToken = response.data.refresh_token || response.data.refreshToken
+        userData = response.data.user || response.data
+      }
+      // Check for nested detail structure (FastAPI format)
+      else if (response.detail) {
+        accessToken = response.detail.access_token || response.detail.token
+        refreshToken = response.detail.refresh_token || response.detail.refreshToken
+        userData = response.detail.user || response.detail
+      }
+      // Fallback - if response has user info but no clear token structure
+      else if (response.user || response.email) {
+        userData = response.user || response
+        // Look for any field that might contain a token
+        accessToken = Object.values(response).find(val => 
+          typeof val === 'string' && val.length > 50 && 
+          (val.startsWith('eyJ') || val.includes('.')) // JWT-like patterns
+        )
+      }
+      
+      console.log('🔑 Extracted token:', accessToken ? `${accessToken.substring(0, 20)}...` : 'None found')
+      console.log('🔄 Extracted refresh token:', refreshToken ? `${refreshToken.substring(0, 20)}...` : 'None found')
+      console.log('👤 Extracted user data:', userData)
       
       // Store tokens and user data
-      const accessToken = tokens.accessToken || tokens.access_token || tokens.token
       if (accessToken) {
         localStorage.setItem('accessToken', accessToken)
-        console.log('✅ Access token stored:', accessToken.substring(0, 20) + '...')
+        console.log('✅ Access token stored successfully')
+      } else {
+        console.error('❌ No access token found in response:', response)
+        throw new Error('Authentication successful but no access token received. Please contact support.')
       }
       
-      if (tokens.refreshToken) {
-        localStorage.setItem('refreshToken', tokens.refreshToken)
+      if (refreshToken) {
+        localStorage.setItem('refreshToken', refreshToken)
+        console.log('✅ Refresh token stored successfully')
       }
       
       if (userData) {
@@ -70,7 +104,7 @@ const handleLogin = async () => {
       }
 
       // Show success toast
-      const userName = userData?.fullName || userData?.name || userData?.email || 'User'
+      const userName = userData?.fullName || userData?.name || userData?.email?.split('@')[0] || 'User'
       toast.success(`Welcome back, ${userName}!`)
       
       // Clear form
@@ -83,10 +117,9 @@ const handleLogin = async () => {
         router.push('/dashboard')
       }, 1500)
     } else {
-      // If we get here, the response format is unexpected
-      console.warn('⚠️ Unexpected response format:', response)
-      console.warn('Response keys:', Object.keys(response || {}))
-      toast.error('Login response received but format is unexpected. Check console for details.')
+      // If we get here, the response format is unexpected or login failed
+      console.error('❌ Unexpected response format:', response)
+      throw new Error('Login failed: Invalid credentials or unexpected server response')
     }
   } catch (error) {
     // Handle API errors
@@ -194,14 +227,25 @@ const objectives = [
 
         <div>
           <label for="password" class="block text-xs font-medium text-gray-700 mb-1">Password</label>
-          <input
-            id="password"
-            v-model="password"
-            type="password"
-            required
-            class="w-full px-2 py-2 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
-            placeholder="Enter your password"
-          />
+          <div class="relative">
+            <input
+              id="password"
+              v-model="password"
+              :type="showPassword ? 'text' : 'password'"
+              required
+              class="w-full px-2 py-2 pr-10 text-sm border border-gray-300 rounded-md focus:ring-1 focus:ring-rwanda-blue focus:border-rwanda-blue transition-colors"
+              placeholder="Enter your password"
+            />
+            <button
+              type="button"
+              @click="showPassword = !showPassword"
+              class="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 transition-colors"
+              tabindex="-1"
+            >
+              <Eye v-if="!showPassword" :size="16" />
+              <EyeOff v-else :size="16" />
+            </button>
+          </div>
         </div>
 
         <div class="flex items-center justify-between text-xs">
