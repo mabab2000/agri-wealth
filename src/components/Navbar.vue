@@ -70,6 +70,62 @@
           <FolderOpen :size="20" />
           <span v-if="!sidebarCollapsed" class="ml-3">Folders</span>
         </router-link>
+
+        <!-- Key Metrics Dropdown -->
+        <div class="relative">
+          <button
+            @click="showKeyMetricsDropdown = !showKeyMetricsDropdown"
+            :class="[
+              'w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+              ($route.path.includes('/agriculture') || $route.path.includes('/livestock') || $route.path.includes('/metrics')) ? 'bg-rwanda-blue text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+              sidebarCollapsed ? 'justify-center' : 'justify-between'
+            ]"
+          >
+            <div class="flex items-center">
+              <BarChart3 :size="20" />
+              <span v-if="!sidebarCollapsed" class="ml-3">Key Metrics</span>
+            </div>
+            <ChevronDown 
+              v-if="!sidebarCollapsed"
+              :size="16" 
+              :class="[
+                'transition-transform duration-200',
+                showKeyMetricsDropdown ? 'rotate-180' : ''
+              ]"
+            />
+          </button>
+          
+          <!-- Dropdown Menu -->
+          <div 
+            v-if="showKeyMetricsDropdown && !sidebarCollapsed"
+            class="mt-1 ml-6 space-y-1"
+          >
+            <!-- Loading State -->
+            <div v-if="isLoadingSuperKeys" class="px-3 py-2 text-xs text-gray-500 text-center">
+              Loading...
+            </div>
+            
+            <!-- Dynamic Super Keys -->
+            <router-link
+              v-for="superKey in superKeys"
+              :key="superKey.id"
+              :to="getSuperKeyRoute(superKey)"
+              @click="handleNavClick"
+              :class="[
+                'w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+                isActiveRoute(superKey) ? 'bg-rwanda-green text-white' : 'text-gray-500 hover:bg-gray-50 hover:text-gray-700'
+              ]"
+            >
+              <component :is="getSuperKeyIcon(superKey.name)" :size="16" />
+              <span class="ml-3">{{ superKey.name }}</span>
+            </router-link>
+            
+            <!-- Fallback if no super keys found -->
+            <div v-if="!isLoadingSuperKeys && superKeys.length === 0" class="px-3 py-2 text-xs text-gray-500 text-center">
+              No metrics available
+            </div>
+          </div>
+        </div>
       </nav>
 
       <!-- User Info and Logout -->
@@ -168,9 +224,13 @@ import {
   Menu,
   BarChart3,
   FolderOpen,
-  LogOut
+  LogOut,
+  ChevronDown,
+  Wheat,
+  PiggyBank
 } from 'lucide-vue-next'
 import Logo from './Logo.vue'
+import { API_BASE_URL } from '../services/api.js'
 
 const props = defineProps({
   collapsed: {
@@ -185,6 +245,9 @@ const toast = useToast()
 
 const userInfo = ref({})
 const showUserModal = ref(false)
+const showKeyMetricsDropdown = ref(false)
+const superKeys = ref([])
+const isLoadingSuperKeys = ref(false)
 
 // Initialize mobile state properly
 const isMobile = () => typeof window !== 'undefined' && window.innerWidth < 768
@@ -205,6 +268,70 @@ const userInitials = computed(() => {
   return name.split(' ').map(word => word.charAt(0)).join('').toUpperCase().substring(0, 2)
 })
 
+// Get auth token from localStorage
+const getAuthToken = () => {
+  return localStorage.getItem('accessToken')
+}
+
+// Fetch super keys for the dropdown
+const fetchSuperKeys = async () => {
+  const token = getAuthToken()
+  if (!token) {
+    return
+  }
+
+  try {
+    isLoadingSuperKeys.value = true
+    
+    const response = await fetch(`${API_BASE_URL}/keys/super-keys`, {
+      headers: {
+        'accept': 'application/json',
+        'Authorization': `Bearer ${token}`
+      }
+    })
+
+    if (!response.ok) {
+      throw new Error(`Failed to fetch super keys: ${response.status}`)
+    }
+
+    const data = await response.json()
+    superKeys.value = Array.isArray(data) ? data : []
+    
+    console.log('Fetched super keys:', superKeys.value)
+    
+  } catch (err) {
+    console.error('Error fetching super keys:', err)
+    // Don't show error toast as this is not critical for navigation
+  } finally {
+    isLoadingSuperKeys.value = false
+  }
+}
+
+// Get icon for super key based on name
+const getSuperKeyIcon = (name) => {
+  const lowerName = name.toLowerCase()
+  if (lowerName.includes('agriculture') || lowerName.includes('crop')) {
+    return Wheat
+  } else if (lowerName.includes('livestock') || lowerName.includes('animal')) {
+    return PiggyBank
+  }
+  // Default icon
+  return BarChart3
+}
+
+// Get route for super key based on ID
+const getSuperKeyRoute = (superKey) => {
+  return `/metrics/${superKey.id}`
+}
+
+// Check if current route matches the super key
+const isActiveRoute = (superKey) => {
+  const currentRoute = router.currentRoute.value
+  return currentRoute.params.superKeyId === superKey.id ||
+         (currentRoute.path.includes('/agriculture') && superKey.name.toLowerCase().includes('agriculture')) ||
+         (currentRoute.path.includes('/livestock') && superKey.name.toLowerCase().includes('livestock'))
+}
+
 const toggleSidebar = () => {
   const newState = !sidebarCollapsed.value
   emit('toggle-sidebar', newState)
@@ -224,6 +351,8 @@ const handleNavClick = () => {
     showUserModal.value = false
     console.log('Navbar: Auto-closing after navigation click')
   }
+  // Close dropdown when navigating
+  showKeyMetricsDropdown.value = false
 }
 
 const closeMobileNav = () => {
@@ -258,6 +387,9 @@ onMounted(() => {
       console.error('Error parsing user data:', error)
     }
   }
+  
+  // Fetch super keys for the dropdown
+  fetchSuperKeys()
   
   // Handle window resize
   const handleResize = () => {

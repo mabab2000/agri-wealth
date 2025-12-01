@@ -4,6 +4,8 @@ import Signup from '../views/Signup.vue'
 import Dashboard from '../views/Dashboard.vue'
 import Folders from '../views/Folders.vue'
 import FolderDetail from '../views/FolderDetail.vue'
+import Agriculture from '../views/Agriculture.vue'
+import Livestock from '../views/Livestock.vue'
 
 const routes = [
   {
@@ -32,6 +34,24 @@ const routes = [
     path: '/folders/:id',
     name: 'FolderDetail',
     component: FolderDetail,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/agriculture/:superKeyId?',
+    name: 'Agriculture',
+    component: Agriculture,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/livestock/:superKeyId?',
+    name: 'Livestock',
+    component: Livestock,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/metrics/:superKeyId',
+    name: 'Metrics',
+    component: Agriculture,
     meta: { requiresAuth: true }
   }
 ]
