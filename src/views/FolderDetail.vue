@@ -116,6 +116,9 @@
                     <th class="px-3 sm:px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Modified
                     </th>
+                    <th class="px-3 sm:px-4 py-2 text-center text-xs font-medium text-gray-500 uppercase tracking-wider">
+                      Analysed
+                    </th>
                     <th class="px-3 sm:px-4 py-2 text-right text-xs font-medium text-gray-500 uppercase tracking-wider">
                       Actions
                     </th>
@@ -155,6 +158,14 @@
                     </td>
                     <td class="px-3 sm:px-4 py-2 whitespace-nowrap text-sm text-gray-500">
                       {{ file.modifiedAt }}
+                    </td>
+                    <td class="px-3 sm:px-4 py-2 whitespace-nowrap text-sm text-gray-500 text-center">
+                      <span
+                        class="inline-flex items-center px-2 py-1 text-xs font-medium rounded-full"
+                        :class="file.analysed_status ? 'bg-green-100 text-green-800' : 'bg-gray-100 text-gray-600'"
+                      >
+                        {{ file.analysed_status ? 'true' : 'false' }}
+                      </span>
                     </td>
                     <td class="px-3 sm:px-4 py-2 whitespace-nowrap text-right text-sm font-medium">
                       <div class="flex items-center justify-end gap-1">
@@ -879,7 +890,8 @@ const loadFolderFiles = async () => {
         type: file.content_type ? file.content_type.split('/').pop().toUpperCase() : (file.original_name.split('.').pop()).toUpperCase(),
         size: file.file_size || 'Unknown',
         modifiedAt: file.created_at ? new Date(file.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        s3_file_path: file.s3_file_path
+        s3_file_path: file.s3_file_path,
+        analysed_status: file.analysed_status === undefined ? false : file.analysed_status
       }))
     } else if (Array.isArray(result)) {
       files.value = result.map(file => ({
@@ -890,7 +902,8 @@ const loadFolderFiles = async () => {
         type: file.content_type ? file.content_type.split('/').pop().toUpperCase() : (file.original_name.split('.').pop()).toUpperCase(),
         size: file.file_size || 'Unknown',
         modifiedAt: file.created_at ? new Date(file.created_at).toISOString().split('T')[0] : new Date().toISOString().split('T')[0],
-        s3_file_path: file.s3_file_path
+        s3_file_path: file.s3_file_path,
+        analysed_status: file.analysed_status === undefined ? false : file.analysed_status
       }))
     } else {
       // Handle case where no files exist yet
@@ -909,7 +922,8 @@ const loadFolderFiles = async () => {
         type: 'XLSX',
         size: '2.4 MB',
         modifiedAt: '2024-11-25',
-        url: '#'
+        url: '#',
+        analysed_status: false
       },
       {
         id: 2,
@@ -917,7 +931,8 @@ const loadFolderFiles = async () => {
         type: 'PDF',
         size: '1.8 MB',
         modifiedAt: '2024-11-24',
-        url: '#'
+        url: '#',
+        analysed_status: true
       }
     ]
   }
