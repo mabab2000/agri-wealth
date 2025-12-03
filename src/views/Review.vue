@@ -190,7 +190,7 @@ onMounted(() => {
 })
 
 const currentPage = ref(1);
-const itemsPerPage = ref(5);
+const itemsPerPage = ref(10); // Default number of rows per page set to 10
 const pageOptions = [5, 10, 25, 50];
 
 const totalItems = computed(() => rows.value.length);
