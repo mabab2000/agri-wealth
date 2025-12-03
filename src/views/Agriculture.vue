@@ -455,7 +455,7 @@ const route = useRoute()
 const toast = useToast()
 
 // Sidebar state
-const sidebarCollapsed = ref(true) // Start collapsed by default
+const sidebarCollapsed = ref(false) // Start expanded by default
 
 // Data state
 const isLoading = ref(false)
@@ -484,9 +484,9 @@ const canScrollLeft = ref(false)
 const canScrollRight = ref(false)
 
 const handleSidebarToggle = (newState) => {
-  console.log('Agriculture: Received toggle event with:', newState)
-  sidebarCollapsed.value = newState
-  console.log('Agriculture: Sidebar state is now:', sidebarCollapsed.value)
+  console.log('Agriculture: Received toggle-sidebar event with state:', newState);
+  sidebarCollapsed.value = newState;
+  console.log('Agriculture: Sidebar state is now:', sidebarCollapsed.value);
 }
 
 // Get auth token from localStorage
@@ -545,7 +545,7 @@ const fetchAgricultureSuperKey = async () => {
 const fetchMainKeys = async () => {
   const token = getAuthToken()
   if (!token) {
-    error.value = 'Authentication required. Please log in.'
+    router.push('/')
     return
   }
 
@@ -568,6 +568,14 @@ const fetchMainKeys = async () => {
     })
 
     if (!response.ok) {
+      // Check if it's an authentication error
+      if (response.status === 401) {
+        localStorage.removeItem('accessToken')
+        localStorage.removeItem('refreshToken')
+        localStorage.removeItem('user')
+        router.push('/')
+        return
+      }
       throw new Error(`Failed to fetch main keys: ${response.status} ${response.statusText}`)
     }
 
@@ -585,6 +593,14 @@ const fetchMainKeys = async () => {
     
   } catch (err) {
     console.error('Error fetching main keys:', err)
+    // Check if it's an authentication error
+    if (err.message.includes('401') || err.message.includes('Unauthorized') || err.message.includes('token')) {
+      localStorage.removeItem('accessToken')
+      localStorage.removeItem('refreshToken')
+      localStorage.removeItem('user')
+      router.push('/')
+      return
+    }
     error.value = err.message || 'Failed to load main keys'
   } finally {
     isLoading.value = false
@@ -880,7 +896,6 @@ watch(() => route.params.superKeyId, (newSuperKeyId) => {
 onMounted(() => {
   const token = getAuthToken()
   if (!token) {
-    toast.error('Please log in to access agriculture metrics')
     router.push('/')
     return
   }

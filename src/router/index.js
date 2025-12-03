@@ -6,6 +6,7 @@ import Folders from '../views/Folders.vue'
 import FolderDetail from '../views/FolderDetail.vue'
 import Agriculture from '../views/Agriculture.vue'
 import Livestock from '../views/Livestock.vue'
+import Review from '../views/Review.vue'
 
 const routes = [
   {
@@ -52,6 +53,12 @@ const routes = [
     path: '/metrics/:superKeyId',
     name: 'Metrics',
     component: Agriculture,
+    meta: { requiresAuth: true }
+  },
+  {
+    path: '/review',
+    name: 'Review',
+    component: Review,
     meta: { requiresAuth: true }
   }
 ]

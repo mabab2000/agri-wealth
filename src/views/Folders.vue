@@ -142,7 +142,7 @@ const token = ref(null)
 const projectId = ref(null)
 
 // Sidebar state
-const sidebarCollapsed = ref(true) // Start collapsed by default
+const sidebarCollapsed = ref(false) // Start expanded by default
 
 // Folder management
 const showCreateFolderModal = ref(false)
@@ -290,7 +290,6 @@ onMounted(async () => {
   token.value = localStorage.getItem('accessToken')
   
   if (!token.value) {
-    toast.error('Please log in to access folders')
     router.push('/')
     return
   }
@@ -311,7 +310,6 @@ onMounted(async () => {
   
   // Redirect to login if not authenticated
   if (!token.value || !projectId.value) {
-    toast.error('Please log in to access folders')
     router.push('/')
     return
   }

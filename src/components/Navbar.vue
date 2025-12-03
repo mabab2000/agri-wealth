@@ -71,6 +71,23 @@
           <span v-if="!sidebarCollapsed" class="ml-3">Folders</span>
         </router-link>
 
+        <!-- Review Link -->
+        <router-link
+          to="/review"
+          @click="handleNavClick"
+          :class="[
+            'w-full flex items-center px-3 py-2 rounded-lg text-sm font-medium transition-colors',
+            $route.path === '/review' ? 'bg-rwanda-blue text-white' : 'text-gray-600 hover:bg-gray-50 hover:text-gray-900',
+            sidebarCollapsed ? 'justify-center' : 'justify-start'
+          ]"
+        >
+          <!-- Database Icon -->
+          <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 4v16m8-8H4" />
+          </svg>
+          <span v-if="!sidebarCollapsed" class="ml-3">Review</span>
+        </router-link>
+
         <!-- Key Metrics Dropdown -->
         <div class="relative">
           <button
@@ -333,9 +350,10 @@ const isActiveRoute = (superKey) => {
 }
 
 const toggleSidebar = () => {
-  const newState = !sidebarCollapsed.value
-  emit('toggle-sidebar', newState)
-  
+  const newState = !sidebarCollapsed.value;
+  console.log('Navbar: Emitting toggle-sidebar with state:', newState);
+  emit('toggle-sidebar', newState);
+
   console.log('Navbar: Toggling sidebar to:', newState)
   
   // On mobile, close user modal when toggling

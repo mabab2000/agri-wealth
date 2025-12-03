@@ -262,7 +262,6 @@ const toast = useToast()
 onMounted(() => {
   const token = localStorage.getItem('accessToken')
   if (!token) {
-    toast.error('Please log in to access the dashboard')
     router.push('/')
     return
   }
@@ -283,7 +282,7 @@ ChartJS.register(
 )
 
 // Sidebar state - initialize based on screen size
-const sidebarCollapsed = ref(true) // Start collapsed by default
+const sidebarCollapsed = ref(false) // Start expanded by default
 
 // Year comparison
 const showCompareModal = ref(false)

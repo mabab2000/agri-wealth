@@ -40,12 +40,19 @@
           </div>
           <div class="flex flex-col sm:flex-row gap-2 sm:gap-3">
             <button
-              v-if="selectedFilesForAnalysis.length > 0"
+              v-if="selectedFilesForAnalysis.length > 0 || analyzingFiles.length > 0"
               @click="analyzeSelectedFiles"
-              class="flex items-center justify-center gap-2 px-4 py-2 bg-rwanda-green text-white rounded-lg hover:bg-green-600 transition-colors text-sm"
+              :disabled="analyzingFiles.length > 0"
+              class="flex items-center justify-center gap-2 px-4 py-2 bg-rwanda-green text-white rounded-lg hover:bg-green-600 transition-colors text-sm disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <span>🗊</span>
-              Analyze {{ selectedFilesForAnalysis.length }} file(s)
+              <div v-if="analyzingFiles.length > 0" class="w-4 h-4 border-2 border-white border-t-transparent rounded-full animate-spin"></div>
+              <span v-else>🗊</span>
+              <span v-if="analyzingFiles.length > 0">
+                Analyzing {{ analyzingFiles.length }} file(s)...
+              </span>
+              <span v-else>
+                Analyze {{ selectedFilesForAnalysis.length }} file(s)
+              </span>
             </button>
             <button
               @click="showUploadModal = true"
@@ -587,18 +594,53 @@ const toggleSelectAll = () => {
   }
 }
 
-const analyzeSelectedFiles = () => {
+const analyzingFiles = ref([])
+
+const analyzeSelectedFiles = async () => {
   if (selectedFilesForAnalysis.value.length === 0) {
     toast.error('Please select files to analyze')
     return
   }
   
-  // Here you can implement the analysis functionality
-  toast.success(`Starting analysis of ${selectedFilesForAnalysis.value.length} file(s)`)
-  console.log('Analyzing files:', selectedFilesForAnalysis.value)
+  const token = localStorage.getItem('accessToken')
+  if (!token) {
+    router.push('/')
+    return
+  }
   
-  // Clear selection after analysis
+  const filesToAnalyze = [...selectedFilesForAnalysis.value]
   selectedFilesForAnalysis.value = []
+  
+  // Add files to analyzing state
+  analyzingFiles.value.push(...filesToAnalyze)
+  
+  toast.info(`Starting analysis of ${filesToAnalyze.length} file(s)...`)
+  
+  for (const fileId of filesToAnalyze) {
+    try {
+      const response = await fetch(`https://agri-wealth-api.onrender.com/documents/analyze?file_id=${fileId}`, {
+        method: 'POST',
+        headers: {
+          'accept': 'application/json',
+          'Authorization': `Bearer ${token}`
+        }
+      })
+      
+      if (response.ok) {
+        const result = await response.json()
+        toast.success(`Analysis completed for file: ${getFileName(fileId)}`)
+        console.log('Analysis result:', result)
+      } else {
+        throw new Error(`Analysis failed with status ${response.status}`)
+      }
+    } catch (error) {
+      console.error('Analysis error:', error)
+      toast.error(`Analysis failed for file: ${getFileName(fileId)}`)
+    } finally {
+      // Remove from analyzing state
+      analyzingFiles.value = analyzingFiles.value.filter(id => id !== fileId)
+    }
+  }
 }
 
 const triggerFileUpload = () => {
@@ -612,6 +654,11 @@ const handleFileSelect = (event) => {
 
 const removeFile = (index) => {
   selectedFiles.value.splice(index, 1)
+}
+
+const getFileName = (fileId) => {
+  const file = files.value.find(f => f.id === fileId)
+  return file ? file.original_name : 'Unknown'
 }
 
 const formatFileSize = (bytes) => {
