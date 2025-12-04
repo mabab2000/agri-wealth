@@ -80,8 +80,14 @@
               <div class="p-3 bg-gray-100 rounded-lg mb-4 inline-block">
                 <FileText :size="24" class="text-gray-400" />
               </div>
-              <h3 class="text-lg font-medium text-gray-900 mb-2">No files yet</h3>
-              <p class="text-gray-500 mb-4">Upload files to get started</p>
+              <div v-if="filesUnavailable">
+                <h3 class="text-lg font-medium text-gray-900 mb-2">Data not available</h3>
+                <p class="text-gray-500 mb-4">Unable to load files right now. Please try again later.</p>
+              </div>
+              <div v-else>
+                <h3 class="text-lg font-medium text-gray-900 mb-2">No files yet</h3>
+                <p class="text-gray-500 mb-4">Upload files to get started</p>
+              </div>
               <button
                 @click="triggerFileUpload"
                 class="inline-flex items-center gap-2 px-4 py-2 bg-rwanda-blue text-white rounded-lg hover:bg-blue-600 transition-colors"
@@ -500,6 +506,7 @@ const files = ref([])
 const selectedFiles = ref([])
 const selectedFilesForAnalysis = ref([])
 const fileInput = ref(null)
+const filesUnavailable = ref(false)
 
 // Pagination
 const currentPage = ref(1)
@@ -912,29 +919,11 @@ const loadFolderFiles = async () => {
     
   } catch (error) {
     console.error('Error loading files:', error)
-    toast.error('Failed to load files. Using sample data.')
-    
-    // Fallback to sample data if API fails
-    files.value = [
-      {
-        id: 1,
-        name: 'crop_analysis_2024.xlsx',
-        type: 'XLSX',
-        size: '2.4 MB',
-        modifiedAt: '2024-11-25',
-        url: '#',
-        analysed_status: false
-      },
-      {
-        id: 2,
-        name: 'weather_report.pdf',
-        type: 'PDF',
-        size: '1.8 MB',
-        modifiedAt: '2024-11-24',
-        url: '#',
-        analysed_status: true
-      }
-    ]
+    toast.error('Failed to load files. Data not available.')
+
+    // Clear files so UI shows empty state instead of sample data
+    files.value = []
+    filesUnavailable.value = true
   }
 }
 

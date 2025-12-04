@@ -32,7 +32,11 @@
           </div>
           
           <!-- Folders Grid -->
-          <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
+          <div v-else class="space-y-4">
+            <div v-if="foldersUnavailable && folders.length === 0" class="text-center py-8">
+              <p class="text-sm text-gray-500">Data not available. Please try again later.</p>
+            </div>
+            <div v-else class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 sm:gap-6">
             <div 
               v-for="folder in folders" 
               :key="folder.id"
@@ -65,6 +69,7 @@
               <h3 class="font-medium text-gray-600 mb-1 text-sm sm:text-base">Create New Folder</h3>
               <p class="text-xs sm:text-sm text-gray-500 text-center px-2">Click to add a new folder to organize your files</p>
             </div>
+          </div>
           </div>
         </div>
       </main>
@@ -148,6 +153,7 @@ const sidebarCollapsed = ref(false) // Start expanded by default
 const showCreateFolderModal = ref(false)
 const newFolderName = ref('')
 const folders = ref([])
+const foldersUnavailable = ref(false)
 
 const handleSidebarToggle = (newState) => {
   console.log('Folders: Received toggle event with:', newState)
@@ -195,35 +201,11 @@ const loadFolders = async () => {
     
   } catch (error) {
     console.error('Error loading folders:', error)
-    toast.error('Failed to load folders. Using sample data.')
+    toast.error('Failed to load folders. Data not available.')
     
-    // Fallback to sample folders if API fails
-    folders.value = [
-      {
-        id: 'sample-1',
-        name: 'Crop Reports',
-        createdAt: '2024-11-20',
-        itemCount: 12
-      },
-      {
-        id: 'sample-2',
-        name: 'Financial Data',
-        createdAt: '2024-11-18',
-        itemCount: 8
-      },
-      {
-        id: 'sample-3',
-        name: 'Weather Analytics',
-        createdAt: '2024-11-15',
-        itemCount: 15
-      },
-      {
-        id: 'sample-4',
-        name: 'Market Insights',
-        createdAt: '2024-11-10',
-        itemCount: 6
-      }
-    ]
+    // Clear folders so UI shows empty state instead of sample data
+    folders.value = []
+    foldersUnavailable.value = true
   } finally {
     isLoading.value = false
   }
